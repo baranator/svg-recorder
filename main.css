@@ -134,10 +134,11 @@ label[for=svg] > img {
     transform: translate(-50%, -50%);
 }
 
-body > img {
+/* Image needs to be displayed on screen to make it being rendered correctly
+   body > img {
     position: absolute;
     right: 100%;
-}
+}*/
 
 /* Buttons */
 button {

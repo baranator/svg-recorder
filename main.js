@@ -6,6 +6,7 @@ const body = document.body,
     previewer = svgLabel.querySelector('img');
 
 let initTime;
+let bgVal;
     
 form.svg.onchange = function(event) {
     const [file] = form.svg.files;
@@ -38,7 +39,7 @@ form.onsubmit = function (event) {
             height: parseInt(form.height.value || form.height.placeholder),
             duration: parseInt(form.duration.value || form.duration.placeholder),
             framerate: parseInt(form.framerate.value || form.framerate.placeholder),
-            background: form.background.value
+            background: bgVal
         }).then(function(blob) {
             const generatedFile = new File([new Blob([blob], {type: 'application/octet-stream'})], file.name.replace(/\.svgz?$/i, '.webm'));
             const a = document.createElement('a');
@@ -69,6 +70,16 @@ form.width.onchange = form.height.onchange = function(e) {
 
 form.width.onfocus = form.height.onfocus = function(e) {
     storeValue(e.currentTarget);
+}
+
+form.backgroundEn.onclick = function(e) {
+    if(form.backgroundEn.checked){
+        form.background.disabled=false
+
+    }else{
+        form.background.disabled=true
+
+    }
 }
 
 /**
@@ -114,16 +125,23 @@ function validateForm() {
             message: 'The framerate is not a valid number'
         });
     // check background
-    if (!form.background.value)
-        errors.push({
-            field: 'background',
-            message: 'The background color must be defined'
-        });
-    else if (!/^#[a-fA-F0-9]{6}$/.test(form.background.value))
-        errors.push({
-            field: 'background',
-            message: `The background value is not a valid color: ${form.background.value}`
-        });
+    if (form["backgroundEn"].checked){
+        if (!form.background.value){
+            errors.push({
+                field: 'background',
+                message: 'The background color must be defined'
+            });
+        }else if (!/^#[a-fA-F0-9]{6}$/.test(form.background.value)){
+            errors.push({
+                field: 'background',
+                message: `The background value is not a valid color: ${form.background.value}`
+            });
+        }else{
+            bgVal=form.background.value
+        }
+    }else{
+        bgVal=null
+    }
     return errors;
 }
 
@@ -160,7 +178,9 @@ function startRecord(options) {
 
         canvas.width = image.width = options.width;
         canvas.height = image.height = options.height;
-        ctx.fillStyle = options.background;
+        if(options.background != null){
+            ctx.fillStyle = options.background;
+        }
 
         body.appendChild(image);
         body.appendChild(canvas);
@@ -215,7 +235,12 @@ function startRecord(options) {
          */
         function render() {
             ctx.rect(0, 0, options.width, options.height);
-            ctx.fill();
+            if(options.background == null){
+                ctx.clearRect(0, 0, options.width, options.height);
+            }else{
+                ctx.fill();
+            }
+
             ctx.drawImage(image, 0, 0, options.width, options.height);
         }
     });
